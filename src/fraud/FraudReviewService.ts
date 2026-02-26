@@ -1,3 +1,4 @@
+import type { PrismaClient } from '@prisma/client';
 import {
   FraudCase,
   FraudDetectionStatus,
@@ -6,44 +7,100 @@ import {
   FraudAlert,
   FraudType
 } from './types';
+import type { FraudDetectionService } from './FraudDetectionService';
 import { EventEmitter } from 'events';
 
-// Mock PrismaClient for now - would be imported from @prisma/client
-interface MockPrismaClient {
-  // This would be replaced with actual PrismaClient
+function toPrismaRiskLevel(level: FraudRiskLevel): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+  return level.toUpperCase() as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+function toPrismaStatus(s: FraudDetectionStatus): string {
+  return s.toUpperCase().replace(/ /g, '_');
+}
+
+function toPrismaFraudType(t: FraudType): string {
+  return t.toUpperCase();
+}
+
+function dbRowToFraudCase(row: {
+  id: string;
+  transactionId: string;
+  userId: string;
+  riskScore: number;
+  riskLevel: string;
+  detectedFraudTypes: string[];
+  status: string;
+  reviewerId: string | null;
+  reviewNotes: string | null;
+  actualOutcome: string | null;
+  modelVersion: string;
+  features: unknown;
+  detectionResult: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  resolvedAt: Date | null;
+}): FraudCase {
+  return {
+    id: row.id,
+    transactionId: row.transactionId,
+    userId: row.userId,
+    riskScore: row.riskScore,
+    riskLevel: row.riskLevel.toLowerCase() as FraudRiskLevel,
+    detectedFraudTypes: row.detectedFraudTypes.map((t) => t.toLowerCase() as FraudType),
+    status: row.status.toLowerCase() as FraudDetectionStatus,
+    reviewerId: row.reviewerId ?? undefined,
+    reviewNotes: row.reviewNotes ?? undefined,
+    actualOutcome: (row.actualOutcome as FraudCase['actualOutcome']) ?? undefined,
+    modelVersion: row.modelVersion,
+    features: row.features as FraudCase['features'],
+    detectionResult: row.detectionResult as FraudCase['detectionResult'],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    resolvedAt: row.resolvedAt ?? undefined,
+  };
 }
 
 export class FraudReviewService extends EventEmitter {
-  private prisma: MockPrismaClient;
+  private prisma: PrismaClient;
+  private fraudDetectionService: FraudDetectionService | null;
   private activeReviews: Map<string, ManualReviewWorkflow> = new Map();
   private reviewQueue: FraudCase[] = [];
   private isProcessingQueue: boolean = false;
 
-  constructor(prisma: MockPrismaClient) {
+  constructor(prisma: PrismaClient, fraudDetectionService?: FraudDetectionService) {
     super();
     this.prisma = prisma;
+    this.fraudDetectionService = fraudDetectionService ?? null;
     this.startQueueProcessor();
   }
 
   /**
-   * Create a new fraud case for manual review
+   * Create a new fraud case for manual review.
+   * @param options.fraudCaseId - When set (e.g. payment.transactionId), used as FraudCase.id so Payment can link.
+   * @param options.features - Transaction features used for detection (for storage and adaptive learning).
    */
-  async createFraudCase(detectionResult: any, transactionId: string, userId: string): Promise<FraudCase> {
+  async createFraudCase(
+    detectionResult: any,
+    transactionId: string,
+    userId: string,
+    options?: { fraudCaseId?: string; features?: import('./types').TransactionFeatures }
+  ): Promise<FraudCase> {
+    const id = options?.fraudCaseId ?? this.generateId();
     const fraudCase: FraudCase = {
-      id: this.generateId(),
+      id,
       transactionId,
       userId,
       riskScore: detectionResult.riskScore,
       riskLevel: detectionResult.riskLevel,
-      detectedFraudTypes: detectionResult.detectedFraudTypes,
-      status: detectionResult.requiresManualReview ? 
-        FraudDetectionStatus.REVIEW_REQUIRED : 
-        FraudDetectionStatus.PENDING,
-      modelVersion: detectionResult.modelVersion,
-      features: detectionResult.features,
+      detectedFraudTypes: detectionResult.detectedFraudTypes ?? [],
+      status: detectionResult.requiresManualReview
+        ? FraudDetectionStatus.REVIEW_REQUIRED
+        : FraudDetectionStatus.PENDING,
+      modelVersion: detectionResult.modelVersion ?? '1.0.0',
+      features: options?.features ?? (detectionResult.features as FraudCase['features']) ?? ({} as FraudCase['features']),
       detectionResult,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Save to database
@@ -412,57 +469,167 @@ export class FraudReviewService extends EventEmitter {
   }
 
   /**
-   * Trigger adaptive learning
+   * Trigger adaptive learning from confirmed fraud: persist as MLTrainingData and run model update.
    */
   private async triggerAdaptiveLearning(fraudCase: FraudCase): Promise<void> {
-    // This would integrate with the FraudDetectionService
-    // For now, just emit an event
     this.emit('triggerAdaptiveLearning', fraudCase);
+
+    const features = fraudCase.features as Record<string, unknown>;
+    const detectionResult = fraudCase.detectionResult as { modelVersion?: string };
+    const modelVersion = detectionResult?.modelVersion ?? '1.0.0';
+
+    try {
+      await this.prisma.mLTrainingData.upsert({
+        where: { transactionId: fraudCase.transactionId },
+        create: {
+          transactionId: fraudCase.transactionId,
+          features: features as object,
+          isFraud: true,
+          fraudType: fraudCase.detectedFraudTypes[0] ? (toPrismaFraudType(fraudCase.detectedFraudTypes[0]) as any) : undefined,
+          confidence: 1,
+          modelVersion,
+          dataSource: 'manual_review',
+        },
+        update: {
+          isFraud: true,
+          features: features as object,
+          confidence: 1,
+          dataSource: 'manual_review',
+        },
+      });
+    } catch (e) {
+      console.error('Failed to persist ML training data for adaptive learning:', e);
+    }
+
+    if (this.fraudDetectionService) {
+      try {
+        const recent = await this.prisma.mLTrainingData.findMany({
+          where: { dataSource: 'manual_review' },
+          orderBy: { createdAt: 'desc' },
+          take: 500,
+        });
+        const trainingData = recent.map((r) => ({
+          id: r.id,
+          transactionId: r.transactionId,
+          features: r.features as FraudCase['features'],
+          isFraud: r.isFraud,
+          confidence: r.confidence,
+          modelVersion: r.modelVersion,
+          dataSource: 'manual_review' as const,
+          createdAt: r.createdAt,
+        }));
+        if (trainingData.length >= 50) {
+          await this.fraudDetectionService.trainModel(trainingData);
+        } else {
+          await this.fraudDetectionService.adaptiveLearning();
+        }
+      } catch (e) {
+        console.error('Adaptive learning run failed:', e);
+      }
+    }
   }
 
-  // Database operations (simplified - would use actual Prisma models)
+  // Database operations via Prisma
   private async saveFraudCase(fraudCase: FraudCase): Promise<void> {
-    // Implementation would save to FraudCase table
-    console.log('Saving fraud case:', fraudCase.id);
+    await this.prisma.fraudCase.upsert({
+      where: { id: fraudCase.id },
+      create: {
+        id: fraudCase.id,
+        transactionId: fraudCase.transactionId,
+        userId: fraudCase.userId,
+        riskScore: fraudCase.riskScore,
+        riskLevel: toPrismaRiskLevel(fraudCase.riskLevel),
+        detectedFraudTypes: fraudCase.detectedFraudTypes.map(toPrismaFraudType) as any,
+        status: toPrismaStatus(fraudCase.status) as any,
+        modelVersion: fraudCase.modelVersion,
+        features: fraudCase.features as object,
+        detectionResult: fraudCase.detectionResult as object,
+      },
+      update: {
+        status: toPrismaStatus(fraudCase.status) as any,
+        reviewerId: fraudCase.reviewerId ?? undefined,
+        reviewNotes: fraudCase.reviewNotes ?? undefined,
+        actualOutcome: fraudCase.actualOutcome ?? undefined,
+        resolvedAt: fraudCase.resolvedAt ?? undefined,
+        updatedAt: fraudCase.updatedAt,
+      },
+    });
   }
 
   private async saveReviewWorkflow(workflow: ManualReviewWorkflow): Promise<void> {
-    // Implementation would save to ManualReviewWorkflow table
-    console.log('Saving review workflow:', workflow.id);
+    const checklist = workflow.checklist;
+    await this.prisma.manualReviewWorkflow.upsert({
+      where: { caseId: workflow.caseId },
+      create: {
+        id: workflow.id,
+        caseId: workflow.caseId,
+        assignedTo: workflow.assignedTo,
+        status: workflow.status,
+        priority: workflow.priority,
+        dueDate: workflow.dueDate,
+        verifyUserIdentity: checklist.verifyUserIdentity,
+        checkTransactionHistory: checklist.checkTransactionHistory,
+        validateGeographicData: checklist.validateGeographicData,
+        reviewDeviceInformation: checklist.reviewDeviceInformation,
+        analyzeBehavioralPatterns: checklist.analyzeBehavioralPatterns,
+        contactUserIfNecessary: checklist.contactUserIfNecessary,
+        notes: workflow.notes,
+        attachments: workflow.attachments,
+        completedAt: workflow.completedAt,
+      },
+      update: {
+        status: workflow.status,
+        notes: workflow.notes,
+        attachments: workflow.attachments,
+        completedAt: workflow.completedAt,
+        updatedAt: workflow.updatedAt,
+      },
+    });
   }
 
   private async saveFraudAlert(alert: FraudAlert): Promise<void> {
-    // Implementation would save to FraudAlert table
-    console.log('Saving fraud alert:', alert.id);
+    await this.prisma.fraudAlert.upsert({
+      where: { id: alert.id },
+      create: {
+        id: alert.id,
+        caseId: alert.caseId,
+        transactionId: alert.transactionId,
+        userId: alert.userId,
+        alertType: toPrismaFraudType(alert.alertType) as any,
+        severity: toPrismaRiskLevel(alert.severity) as any,
+        message: alert.message,
+        details: alert.details as object,
+      },
+      update: {},
+    });
   }
 
   public async getFraudCase(caseId: string): Promise<FraudCase> {
-    // Implementation would fetch from database
-    // Return mock data for now
-    return {
-      id: caseId,
-      transactionId: 'tx-123',
-      userId: 'user-123',
-      riskScore: 85,
-      riskLevel: FraudRiskLevel.HIGH,
-      detectedFraudTypes: [FraudType.UNUSUAL_PATTERN],
-      status: FraudDetectionStatus.REVIEW_REQUIRED,
-      modelVersion: '1.0.0',
-      features: {} as any,
-      detectionResult: {} as any,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    const row = await this.prisma.fraudCase.findUnique({
+      where: { id: caseId },
+    });
+    if (!row) {
+      throw new Error('Fraud case not found');
+    }
+    return dbRowToFraudCase(row);
   }
 
-  private async getFraudCasesInTimeRange(timeRange: { start: Date, end: Date }): Promise<FraudCase[]> {
-    // Implementation would query database
-    return [];
+  private async getFraudCasesInTimeRange(timeRange: { start: Date; end: Date }): Promise<FraudCase[]> {
+    const rows = await this.prisma.fraudCase.findMany({
+      where: {
+        createdAt: { gte: timeRange.start, lte: timeRange.end },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(dbRowToFraudCase);
   }
 
   private async getCompletedReviewsByReviewer(reviewerId: string): Promise<any[]> {
-    // Implementation would query database
-    return [];
+    const workflows = await this.prisma.manualReviewWorkflow.findMany({
+      where: { assignedTo: reviewerId, status: 'completed' },
+      orderBy: { completedAt: 'desc' },
+    });
+    return workflows;
   }
 
   private calculateAverageResolutionTime(completedReviews: any[]): number {

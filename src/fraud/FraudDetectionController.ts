@@ -1,17 +1,15 @@
 import { Request, Response } from 'express';
-import { FraudDetectionService } from './FraudDetectionService';
-import { FraudReviewService } from './FraudReviewService';
-import { 
-  FraudDetectionRequest, 
-  FraudDetectionResponse,
-  FraudDetectionStatus,
+import { PrismaClient } from '@prisma/client';
+import { getFraudDetectionService, getFraudReviewService } from './index';
+import {
+  FraudDetectionRequest,
   FraudRiskLevel,
   FraudType
 } from './types';
 
-const fraudDetectionService = new FraudDetectionService();
-// Note: In a real implementation, you'd inject Prisma client
-const fraudReviewService = new FraudReviewService({} as any);
+const prisma = new PrismaClient();
+const fraudDetectionService = getFraudDetectionService();
+const fraudReviewService = getFraudReviewService(prisma);
 
 /**
  * Detect fraud in a transaction

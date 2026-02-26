@@ -391,8 +391,9 @@ export class FraudDetectionService {
         batchSize: 32,
         validationSplit: 0.2,
         callbacks: {
-          onEpochEnd: (epoch, logs) => {
-            console.log(`Epoch ${epoch}: loss = ${logs.loss}, accuracy = ${logs.acc}`);
+          onEpochEnd: (epoch, logs: Record<string, number>) => {
+            const acc = logs.accuracy ?? logs.acc;
+            console.log(`Epoch ${epoch}: loss = ${logs.loss}, accuracy = ${acc}`);
           }
         }
       });

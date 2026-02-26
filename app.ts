@@ -13,6 +13,7 @@ import { getDashboardData, generateReport, exportData } from './controllers/Anal
 import { applyPaymentSecurity, processPayment, getPaymentHistory, validatePayment } from './controllers/PaymentController';
 import { setupRateLimitRoutes } from './routes/rateLimitRoutes';
 import auditRoutes from './routes/auditRoutes';
+import fraudRoutes from './routes/fraudRoutes';
 import { auditCleanupService } from './services/AuditCleanupService';
 import { registerAuditHandlers } from './databases/event-patterns/handlers/auditHandlers';
 import { EventBus } from './databases/event-patterns/EventBus';
@@ -98,6 +99,9 @@ setupRateLimitRoutes(app);
 
 // 11. Audit Routes
 app.use('/api/audit', auditRoutes);
+
+// 11b. Fraud detection API (ML scoring 0-100, manual review workflow, adaptive learning)
+app.use('/api/fraud', fraudRoutes);
 
 // 12. API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
