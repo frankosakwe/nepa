@@ -66,9 +66,9 @@ app.get('/health', async (req, res) => {
         const response = await axios.get(`${url}/health`, { timeout: 1500 });
         return { service: name, status: response.status < 500 ? 'UP' : 'DEGRADED' };
       } catch {
-        return { service: name, status: 'DOWN' };
+        return { service: name, status: "DOWN" };
       }
-    })
+    }),
   );
 
   const allUp = gatewayHealth.status === 'UP' && downstream.every(s => s.status === 'UP');

@@ -1,43 +1,76 @@
-import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerJsdoc from "swagger-jsdoc";
 
-const baseDefinition = {
-  openapi: '3.0.0',
-  info: {
-    title: 'Nepa API',
-    version: '1.0.0',
-    description: 'API documentation for Nepa Billing System. Use versioned paths (e.g. /api/v1, /api/v2) for stable integrations.',
-  },
-  servers: [
-    { url: 'http://localhost:3000/api', description: 'Development (default v2)' },
-    { url: 'http://localhost:3000/api/v1', description: 'API v1' },
-    { url: 'http://localhost:3000/api/v2', description: 'API v2' },
-  ],
-  components: {
-    securitySchemes: {
-      ApiKeyAuth: {
-        type: 'apiKey',
-        in: 'header',
-        name: 'x-api-key',
+const options: swaggerJsdoc.Options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Nepa API",
+      version: "1.0.0",
+      description: "API documentation for Nepa Billing System",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000/api",
+        description: "Development server",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        ApiKeyAuth: {
+          type: "apiKey",
+          in: "header",
+          name: "x-api-key",
+        },
+      },
+      schemas: {
+        User: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            email: { type: "string" },
+            firstName: { type: "string" },
+            lastName: { type: "string" },
+            role: { type: "string", enum: ["USER", "ADMIN"] },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        UserCreate: {
+          type: "object",
+          required: ["email", "password", "firstName", "lastName"],
+          properties: {
+            email: { type: "string" },
+            password: { type: "string" },
+            firstName: { type: "string" },
+            lastName: { type: "string" },
+            role: { type: "string", default: "USER" },
+          },
+        },
+        Payment: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            billId: { type: "string" },
+            userId: { type: "string" },
+            amount: { type: "number" },
+            currency: { type: "string", default: "XLM" },
+            status: { type: "string", enum: ["PENDING", "SUCCESS", "FAILED"] },
+            createdAt: { type: "string", format: "date-time" },
+          },
+        },
+        PaymentCreate: {
+          type: "object",
+          required: ["billId", "userId", "amount"],
+          properties: {
+            billId: { type: "string" },
+            userId: { type: "string" },
+            amount: { type: "number" },
+            currency: { type: "string", default: "XLM" },
+          },
+        },
       },
     },
   },
-  security: [{ ApiKeyAuth: [] }],
-};
-
-const options: swaggerJsdoc.Options = {
-  definition: baseDefinition,
-  apis: ['./**/*.ts'],
+  apis: ["./**/*.ts"], // Scan all ts files for annotations
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
-
-/** Build version-specific OpenAPI spec with correct server base path */
-export function getVersionedSwaggerSpec(version: 'v1' | 'v2') {
-  const def = {
-    ...baseDefinition,
-    info: { ...baseDefinition.info, version: version === 'v1' ? '1.0.0' : '2.0.0', title: `Nepa API ${version.toUpperCase()}` },
-    servers: [{ url: `http://localhost:3000/api/${version}`, description: `API ${version}` }],
-    components: baseDefinition.components,
-  };
-  return swaggerJsdoc({ definition: def, apis: options.apis });
-}
