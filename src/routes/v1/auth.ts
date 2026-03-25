@@ -445,4 +445,51 @@ router.get('/check-email', authController.checkEmailAvailability);
  */
 router.get('/check-username', authController.checkUsernameAvailability);
 
+/**
+ * @swagger
+ * /auth/token-status:
+ *   get:
+ *     tags:
+ *       - Authentication
+ *     summary: Get token status and expiration information
+ *     description: Retrieves the current status of the authentication token including expiration warnings
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                   description: Whether the token is valid
+ *                 expiresAt:
+ *                   type: string
+ *                   format: date-time
+ *                   description: Token expiration time
+ *                 timeUntilExpiry:
+ *                   type: number
+ *                   description: Time until token expires in milliseconds
+ *                 warningLevel:
+ *                   type: string
+ *                   enum: [none, warning, critical, expired]
+ *                   description: Warning level for token expiration
+ *                 message:
+ *                   type: string
+ *                   description: User-friendly message about token status
+ *                 actionRequired:
+ *                   type: boolean
+ *                   description: Whether immediate action is required
+ *       401:
+ *         description: Token expired or invalid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ */
+router.get('/token-status', authController.getTokenStatus);
+
 export default router;

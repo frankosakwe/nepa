@@ -455,6 +455,8 @@ export class AuthenticationService {
 
     const decoded = jwt.decode(token) as any;
     const sessionId = decoded.sessionId;
+    const issuedAt = new Date(decoded.iat * 1000);
+    const expiresAt = new Date(decoded.exp * 1000);
 
     // Store session in database
     await prisma.userSession.create({
@@ -465,7 +467,8 @@ export class AuthenticationService {
         sessionId,
         userAgent,
         ipAddress,
-        expiresAt: new Date(decoded.exp * 1000)
+        issuedAt,
+        expiresAt
       }
     });
 
@@ -512,9 +515,9 @@ export class AuthenticationService {
     }
   }
 
-  async verifyToken(token: string): Promise<{ user?: User; error?: string }> {
+  async verifyToken(token: string): Promise<{ user?: User; error?: string; expiresAt?: Date; timeUntilExpiry?: number }> {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string; sessionId: string };
+      const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string; sessionId: string; exp: number };
       
       const session = await prisma.userSession.findFirst({
         where: {
@@ -531,8 +534,19 @@ export class AuthenticationService {
         return { error: 'Invalid or expired session' };
       }
 
-      return { user: session.user };
+      const now = new Date();
+      const expiresAt = new Date(decoded.exp * 1000);
+      const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+
+      return { 
+        user: session.user,
+        expiresAt,
+        timeUntilExpiry
+      };
     } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        return { error: 'Token expired' };
+      }
       return { error: 'Invalid token' };
     }
   }
@@ -545,5 +559,53 @@ export class AuthenticationService {
     };
 
     return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+  }
+
+  async getTokenStatus(token: string): Promise<{
+    valid: boolean;
+    expiresAt?: Date;
+    timeUntilExpiry?: number;
+    warningLevel?: 'none' | 'warning' | 'critical' | 'expired';
+    error?: string;
+  }> {
+    try {
+      const decoded = jwt.decode(token) as any;
+      if (!decoded || !decoded.exp) {
+        return { valid: false, error: 'Invalid token format' };
+      }
+
+      const now = new Date();
+      const expiresAt = new Date(decoded.exp * 1000);
+      const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+
+      if (timeUntilExpiry <= 0) {
+        return { 
+          valid: false, 
+          expiresAt, 
+          timeUntilExpiry, 
+          warningLevel: 'expired',
+          error: 'Token expired' 
+        };
+      }
+
+      let warningLevel: 'none' | 'warning' | 'critical' = 'none';
+      const fiveMinutes = 5 * 60 * 1000;
+      const oneMinute = 1 * 60 * 1000;
+
+      if (timeUntilExpiry <= oneMinute) {
+        warningLevel = 'critical';
+      } else if (timeUntilExpiry <= fiveMinutes) {
+        warningLevel = 'warning';
+      }
+
+      return {
+        valid: true,
+        expiresAt,
+        timeUntilExpiry,
+        warningLevel
+      };
+    } catch (error) {
+      return { valid: false, error: 'Invalid token' };
+    }
   }
 }
