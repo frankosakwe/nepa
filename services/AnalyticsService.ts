@@ -343,4 +343,149 @@ export class AnalyticsService {
     const rows = data.map(row => `${row.date},${row.value.toFixed(2)}`).join('\n');
     return header + rows;
   }
+
+  async getRevenueData(startDate?: Date, endDate?: Date) {
+    const where: any = { status: 'SUCCESS' };
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = startDate;
+      if (endDate) where.createdAt.lte = endDate;
+    }
+
+    const payments = await prisma.payment.findMany({
+      where,
+      select: {
+        id: true,
+        amount: true,
+        status: true,
+        createdAt: true,
+        bill: {
+          select: {
+            id: true,
+            amount: true,
+            utility: {
+              select: {
+                name: true,
+                type: true
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return payments;
+  }
+
+  async getUserData(startDate?: Date, endDate?: Date) {
+    const where: any = {};
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = startDate;
+      if (endDate) where.createdAt.lte = endDate;
+    }
+
+    const users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        name: true,
+        role: true,
+        status: true,
+        isEmailVerified: true,
+        twoFactorEnabled: true,
+        createdAt: true,
+        lastLoginAt: true,
+        _count: {
+          select: {
+            bills: true,
+            payments: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return users;
+  }
+
+  async getBillsData(startDate?: Date, endDate?: Date) {
+    const where: any = {};
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = startDate;
+      if (endDate) where.createdAt.lte = endDate;
+    }
+
+    const bills = await prisma.bill.findMany({
+      where,
+      select: {
+        id: true,
+        amount: true,
+        lateFee: true,
+        discount: true,
+        dueDate: true,
+        status: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true
+          }
+        },
+        utility: {
+          select: {
+            name: true,
+            type: true,
+            provider: true
+          }
+        },
+        payments: {
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            createdAt: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return bills;
+  }
+
+  convertToCSV(data: any[]): string {
+    if (!data || data.length === 0) {
+      return 'No data available';
+    }
+
+    const headers = Object.keys(data[0]);
+    const csvHeaders = headers.join(',');
+    
+    const csvRows = data.map(row => {
+      return headers.map(header => {
+        const value = row[header];
+        if (value === null || value === undefined) return '';
+        if (typeof value === 'object') return JSON.stringify(value);
+        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      }).join(',');
+    });
+
+    return [csvHeaders, ...csvRows].join('\n');
+  }
 }

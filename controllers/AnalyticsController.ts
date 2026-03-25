@@ -3,6 +3,43 @@ import { AnalyticsService } from '../services/AnalyticsService';
 
 const analyticsService = new AnalyticsService();
 
+/**
+ * @openapi
+ * /api/analytics/dashboard:
+ *   get:
+ *     summary: Get analytics dashboard data
+ *     description: Retrieve comprehensive analytics data including billing stats, revenue charts, user growth, and predictions
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 summary:
+ *                   type: object
+ *                   properties:
+ *                     totalRevenue:
+ *                       type: number
+ *                     overdueBills:
+ *                       type: number
+ *                     pendingBills:
+ *                       type: number
+ *                 charts:
+ *                   type: object
+ *                   properties:
+ *                     revenue:
+ *                       type: array
+ *                     userGrowth:
+ *                       type: array
+ *                 prediction:
+ *                   type: object
+ *       500:
+ *         description: Failed to fetch dashboard data
+ */
 export const getDashboardData = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate, days = '30' } = req.query;
@@ -99,6 +136,54 @@ export const generateReport = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * @openapi
+ * /api/analytics/export:
+ *   get:
+ *     summary: Export analytics data
+ *     description: Export data in CSV or JSON format with optional date filtering
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: format
+ *         schema:
+ *           type: string
+ *           enum: [csv, json]
+ *           default: csv
+ *         description: Export format
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [revenue, users, bills]
+ *           default: revenue
+ *         description: Type of data to export
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Start date for filtering (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: End date for filtering (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: Data exported successfully
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *           application/json:
+ *             schema:
+ *               type: array
+ *       500:
+ *         description: Failed to export data
+ */
 export const exportData = async (req: Request, res: Response) => {
   try {
     const { type = 'revenue', startDate, endDate, days = '30' } = req.query;

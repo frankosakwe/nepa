@@ -135,7 +135,8 @@ export const getPaymentHistory = async (req: Request, res: Response) => {
     
     res.status(200).json({
       status: 200,
-      data: paymentHistory
+      data: paymentHistory.payments,
+      pagination: paymentHistory.pagination
     });
     
   } catch (error) {
