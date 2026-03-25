@@ -3,6 +3,7 @@ import { BillingService } from '../BillingService';
 import { paymentLimiter, transactionLimiter } from '../middleware/rateLimiter';
 import { conditionalCaptcha } from '../middleware/captcha';
 import { abuseDetector } from '../middleware/abuseDetection';
+import { invalidateUserCache, invalidateCacheByPattern } from '../middleware/cache';
 
 const billingService = new BillingService();
 
@@ -80,6 +81,10 @@ export const processPayment = async (req: Request, res: Response) => {
       paymentMethod,
       timestamp: new Date()
     });
+    
+    // Invalidate user cache and payment cache after payment processing
+    await invalidateUserCache(userId);
+    await invalidateCacheByPattern('payment');
     
     res.status(200).json({
       status: 200,
