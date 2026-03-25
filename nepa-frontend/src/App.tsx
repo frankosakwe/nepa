@@ -42,7 +42,7 @@ const App: React.FC = () => {
             
             <section aria-labelledby="features-heading">
               <h2 id="features-heading" className="sr-only">Platform Features</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-6">
                 <article className="bg-card border border-border rounded-lg p-6 shadow focus-within:ring-2 focus-within:ring-ring">
                   <h3 className="text-xl font-semibold text-card-foreground mb-2">Payment Processing</h3>
                   <p className="text-muted-foreground">Secure and efficient payment processing with multiple payment options.</p>
