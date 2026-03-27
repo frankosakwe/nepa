@@ -166,9 +166,22 @@ const AppContent: React.FC = () => {
             </div>
             <h1 className="text-2xl font-bold text-foreground">NEPA Platform</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <KeyboardShortcutHelp />
-            <ThemeToggle />
+        </main>
+        
+        <footer role={landmarkRoles.contentinfo} className="border-t border-border bg-card mt-12">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="text-center md:text-left">
+                <p className="text-muted-foreground">
+                  &copy; 2024 NEPA Platform. All rights reserved.
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-6">
+                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
+                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</a>
+                <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Support</a>
+              </div>
+            </div>
           </div>
         </div>
       </header>

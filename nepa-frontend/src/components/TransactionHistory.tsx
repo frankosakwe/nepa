@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Transaction, TransactionHistory, TransactionFilters, PaymentStatus } from '../types';
 import TransactionService from '../services/transactionService';
+import BookmarkService from '../services/bookmarkService';
+import { Star, Trash2, CheckCircle, FileText, Download } from 'lucide-react';
+import { AdvancedDataTable } from './AdvancedDataTable';
 
 interface Props {
   className?: string;
@@ -20,6 +23,14 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
     totalCount: 0,
     hasNextPage: false,
   });
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [selectedRows, setSelectedRows] = useState<Transaction[]>([]);
+
+  // Check bookmarks on mount
+  useEffect(() => {
+    const bookmarks = BookmarkService.getBookmarks();
+    setBookmarkedIds(new Set(bookmarks.map(b => b.id)));
+  }, []);
 
   // Load transactions on component mount and filter changes
   useEffect(() => {
@@ -100,6 +111,25 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
     }
   };
 
+  const handleToggleBookmark = (transaction: Transaction) => {
+    const isBookmarked = BookmarkService.toggleBookmark({
+      id: transaction.id,
+      type: 'transaction',
+      title: `Transaction ${transaction.id}`,
+      data: transaction
+    });
+    
+    setBookmarkedIds(prev => {
+      const next = new Set(prev);
+      if (isBookmarked) {
+        next.add(transaction.id);
+      } else {
+        next.delete(transaction.id);
+      }
+      return next;
+    });
+  };
+
   const clearFilters = () => {
     setFilters({});
   };
@@ -128,7 +158,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
         
         <div className="flex gap-3">
           <button
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => setShowFilters((prev: boolean) => !prev)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             {showFilters ? 'Hide Filters' : 'Show Filters'}
@@ -166,7 +196,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
               <input
                 type="date"
                 value={filters.dateFrom || ''}
-                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('dateFrom', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -176,7 +206,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
               <input
                 type="date"
                 value={filters.dateTo || ''}
-                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('dateTo', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -188,7 +218,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
                 type="text"
                 placeholder="METER-123"
                 value={filters.meterId || ''}
-                onChange={(e) => handleFilterChange('meterId', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('meterId', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -198,7 +228,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
                 value={filters.status || ''}
-                onChange={(e) => handleFilterChange('status', e.target.value as PaymentStatus)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleFilterChange('status', e.target.value as PaymentStatus)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Statuses</option>
@@ -216,7 +246,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
                 type="number"
                 placeholder="0.00"
                 value={filters.minAmount || ''}
-                onChange={(e) => handleFilterChange('minAmount', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('minAmount', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -227,7 +257,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
                 type="number"
                 placeholder="0.00"
                 value={filters.maxAmount || ''}
-                onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange('maxAmount', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -259,114 +289,24 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
           <input
             type="text"
             placeholder="Search by transaction ID, meter ID, or amount..."
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
             className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
         </div>
       </div>
 
-      {/* Transactions List */}
-      {filteredTransactions.length === 0 && !loading ? (
-        <div className="text-center py-12">
-          <div className="text-gray-500 text-lg">No transactions found</div>
-          <p className="text-gray-400 mt-2">Try adjusting your filters or search terms</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date & Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Transaction ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Meter ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredTransactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {TransactionService.formatDate(transaction.date)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <span className="font-mono text-xs">{transaction.id}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {transaction.meterId}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {TransactionService.formatAmount(transaction.amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TransactionService.getStatusColor(transaction.status)}`}>
-                        <span className="mr-1">{TransactionService.getStatusIcon(transaction.status)}</span>
-                        {transaction.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleViewReceipt(transaction)}
-                          className="text-blue-600 hover:text-blue-900 font-medium"
-                        >
-                          View Receipt
-                        </button>
-                        <button
-                          onClick={() => handleDownloadReceipt(transaction.id)}
-                          className="text-green-600 hover:text-green-900 font-medium"
-                        >
-                          Download PDF
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="mt-6 flex justify-center items-center space-x-2">
-          <button
-            onClick={() => handleFilterChange('page', Math.max(1, pagination.currentPage - 1))}
-            disabled={pagination.currentPage <= 1}
-            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          
-          <span className="px-4 py-2">
-            Page {pagination.currentPage} of {pagination.totalPages}
-          </span>
-          
-          <button
-            onClick={() => handleFilterChange('page', Math.min(pagination.totalPages, pagination.currentPage + 1))}
-            disabled={pagination.currentPage >= pagination.totalPages}
-            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      {/* Transactions Table */}
+      <TransactionHistoryTable 
+        transactions={transactions}
+        loading={loading}
+        pagination={pagination}
+        onPageChange={(page: number) => handleFilterChange('page', page)}
+        onViewReceipt={handleViewReceipt}
+        onDownloadPDF={handleDownloadReceipt}
+        onToggleBookmark={handleToggleBookmark}
+        bookmarkedIds={bookmarkedIds}
+      />
 
       {/* Receipt Modal */}
       {showReceiptModal && selectedTransaction && (
@@ -444,5 +384,151 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
         </div>
       )}
     </div>
+  );
+};
+
+// Sub-component for Transaction List integrated with AdvancedDataTable
+export const TransactionHistoryTable: React.FC<{
+  transactions: Transaction[];
+  loading: boolean;
+  pagination: any;
+  onPageChange: (page: number) => void;
+  onViewReceipt: (t: Transaction) => void;
+  onDownloadPDF: (id: string) => void;
+  onToggleBookmark: (t: Transaction) => void;
+  bookmarkedIds: Set<string>;
+}> = ({ 
+  transactions, 
+  loading, 
+  pagination, 
+  onPageChange, 
+  onViewReceipt, 
+  onDownloadPDF, 
+  onToggleBookmark,
+  bookmarkedIds
+}) => {
+  const [selectedRows, setSelectedRows] = useState<Transaction[]>([]);
+
+  const columns = [
+    { 
+      key: 'date', 
+      label: 'Date & Time', 
+      sortable: true,
+      render: (value: string) => TransactionService.formatDate(value)
+    },
+    { 
+      key: 'id', 
+      label: 'Transaction ID', 
+      render: (value: string) => <span className="font-mono text-xs">{value}</span>
+    },
+    { key: 'meterId', label: 'Meter ID', sortable: true },
+    { 
+      key: 'amount', 
+      label: 'Amount', 
+      sortable: true,
+      render: (value: number) => (
+        <span className="font-medium">{TransactionService.formatAmount(value)}</span>
+      )
+    },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      sortable: true,
+      render: (value: PaymentStatus) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TransactionService.getStatusColor(value)}`}>
+          <span className="mr-1">{TransactionService.getStatusIcon(value)}</span>
+          {value}
+        </span>
+      )
+    },
+    {
+      key: 'bookmark',
+      label: 'Bookmark',
+      render: (_: any, row: Transaction) => (
+        <button
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            onToggleBookmark(row);
+          }}
+          className={`transition-colors h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100 ${
+            bookmarkedIds.has(row.id) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'
+          }`}
+        >
+          <Star className="w-5 h-5" />
+        </button>
+      )
+    }
+  ];
+
+  const actions = [
+    {
+      key: 'view',
+      label: 'View Receipt',
+      icon: <FileText className="w-4 h-4" />,
+      onClick: (row: Transaction) => onViewReceipt(row)
+    },
+    {
+      key: 'download',
+      label: 'Download PDF',
+      icon: <Download className="w-4 h-4" />,
+      onClick: (row: Transaction) => onDownloadPDF(row.id)
+    }
+  ];
+
+  const bulkActions = [
+    {
+      key: 'bulk-delete',
+      label: 'Delete Selected',
+      icon: <Trash2 className="w-4 h-4" />,
+      variant: 'danger' as const,
+      onClick: (rows: Transaction[]) => {
+        if (confirm(`Are you sure you want to delete ${rows.length} transactions?`)) {
+          console.log('Deleting rows:', rows.map(r => r.id));
+          // In a real app, call service.deleteTransactions(ids)
+        }
+      }
+    },
+    {
+      key: 'bulk-bookmark',
+      label: 'Bookmark All',
+      icon: <Star className="w-4 h-4" />,
+      onClick: (rows: Transaction[]) => {
+        rows.forEach(row => {
+          if (!bookmarkedIds.has(row.id)) {
+            onToggleBookmark(row);
+          }
+        });
+      }
+    },
+    {
+      key: 'bulk-success',
+      label: 'Mark as Success',
+      icon: <CheckCircle className="w-4 h-4" />,
+      onClick: (rows: Transaction[]) => {
+        console.log('Marking as success:', rows.map(r => r.id));
+      }
+    }
+  ];
+
+  return (
+    <AdvancedDataTable
+      data={transactions}
+      columns={columns}
+      actions={actions}
+      loading={loading}
+      selection={{
+        selectedRows,
+        onSelectionChange: setSelectedRows
+      }}
+      bulkActions={bulkActions}
+      pagination={{
+        page: pagination.currentPage,
+        pageSize: 10,
+        total: pagination.totalCount,
+        onPageChange: onPageChange,
+        onPageSizeChange: (size: number) => console.log('Page size change:', size)
+      }}
+      emptyMessage="No transactions found matching your criteria."
+    />
   );
 };

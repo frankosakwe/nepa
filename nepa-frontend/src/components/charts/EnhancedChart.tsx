@@ -266,7 +266,14 @@ export const EnhancedChart: React.FC<EnhancedChartProps> = ({
               label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
               {...axisProps}
             />
-            {showTooltip && <Tooltip content={customTooltip || DefaultTooltip} />}
+            {showTooltip && (
+              <Tooltip 
+                content={customTooltip || DefaultTooltip} 
+                wrapperStyle={{ zIndex: 100 }}
+                cursor={{ stroke: resolvedTheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', strokeWidth: 2 }}
+                offset={20}
+              />
+            )}
             {showLegend && <Legend content={customLegend || DefaultLegend} />}
             {showBrush && <Brush dataKey={dataKey} height={30} />}
             <Line 
@@ -294,7 +301,13 @@ export const EnhancedChart: React.FC<EnhancedChartProps> = ({
               label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
               {...axisProps}
             />
-            {showTooltip && <Tooltip content={customTooltip || DefaultTooltip} />}
+            {showTooltip && (
+              <Tooltip 
+                content={customTooltip || DefaultTooltip} 
+                wrapperStyle={{ zIndex: 100 }}
+                offset={20}
+              />
+            )}
             {showLegend && <Legend content={customLegend || DefaultLegend} />}
             {showBrush && <Brush dataKey={dataKey} height={30} />}
             <Bar 
@@ -320,7 +333,13 @@ export const EnhancedChart: React.FC<EnhancedChartProps> = ({
               label={{ value: yAxisLabel, angle: -90, position: 'insideLeft' }}
               {...axisProps}
             />
-            {showTooltip && <Tooltip content={customTooltip || DefaultTooltip} />}
+            {showTooltip && (
+              <Tooltip 
+                content={customTooltip || DefaultTooltip} 
+                wrapperStyle={{ zIndex: 100 }}
+                offset={20}
+              />
+            )}
             {showLegend && <Legend content={customLegend || DefaultLegend} />}
             {showBrush && <Brush dataKey={dataKey} height={30} />}
             <Area 
@@ -359,7 +378,13 @@ export const EnhancedChart: React.FC<EnhancedChartProps> = ({
                 />
               ))}
             </Pie>
-            {showTooltip && <Tooltip content={customTooltip || DefaultTooltip} />}
+            {showTooltip && (
+              <Tooltip 
+                content={customTooltip || DefaultTooltip} 
+                wrapperStyle={{ zIndex: 100 }}
+                offset={20}
+              />
+            )}
             {showLegend && <Legend content={customLegend || DefaultLegend} />}
           </PieChart>
         );
