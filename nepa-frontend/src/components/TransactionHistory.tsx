@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Transaction, TransactionHistory, TransactionFilters, PaymentStatus } from '../types';
 import TransactionService from '../services/transactionService';
+import { Loading } from './Loading';
 
 interface Props {
   className?: string;
@@ -9,6 +10,8 @@ interface Props {
 export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [showFilters, setShowFilters] = useState(false);
@@ -58,6 +61,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
 
   const handleSearch = (searchTerm: string) => {
     if (searchTerm.trim()) {
+      setSearchLoading(true);
       TransactionService.searchTransactions(searchTerm, filters)
         .then(result => {
           setTransactions(result.transactions);
@@ -68,7 +72,8 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
             hasNextPage: result.hasNextPage,
           });
         })
-        .catch(err => setError(err instanceof Error ? err.message : 'Search failed'));
+        .catch(err => setError(err instanceof Error ? err.message : 'Search failed'))
+        .finally(() => setSearchLoading(false));
     } else {
       loadTransactions();
     }
@@ -84,9 +89,12 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
 
   const handleExportCSV = async () => {
     try {
+      setExportLoading(true);
       await TransactionService.exportToCSV(filters);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to export transactions');
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -109,8 +117,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
   if (loading && transactions.length === 0) {
     return (
       <div className={`flex justify-center items-center py-12 ${className}`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Loading transactions...</span>
+        <Loading size="lg" label="Loading transactions..." />
       </div>
     );
   }
@@ -136,10 +143,17 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
           
           <button
             onClick={handleExportCSV}
-            disabled={loading || transactions.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+            disabled={loading || exportLoading || transactions.length === 0}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center gap-2"
           >
-            Export CSV
+            {exportLoading ? (
+              <>
+                <Loading size="sm" />
+                Exporting...
+              </>
+            ) : (
+              'Export CSV'
+            )}
           </button>
         </div>
       </div>
@@ -260,13 +274,24 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
             type="text"
             placeholder="Search by transaction ID, meter ID, or amount..."
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
+          {searchLoading && (
+            <div className="absolute right-3 top-3.5">
+              <Loading size="sm" />
+            </div>
+          )}
         </div>
       </div>
 
       {/* Transactions List */}
+      {loading && transactions.length > 0 && (
+        <div className="flex justify-center items-center py-8">
+          <Loading size="md" label="Updating transactions..." />
+        </div>
+      )}
+      
       {filteredTransactions.length === 0 && !loading ? (
         <div className="text-center py-12">
           <div className="text-gray-500 text-lg">No transactions found</div>
