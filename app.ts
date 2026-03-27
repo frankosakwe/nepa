@@ -3,10 +3,14 @@ import swaggerUi from 'swagger-ui-express';
 import { apiLimiter, ddosDetector, checkBlockedIP, ipRestriction, progressiveLimiter } from './middleware/rateLimiter';
 import { configureSecurity } from './middleware/security';
 import { apiKeyAuth } from './middleware/auth';
-import { loggingMiddleware, setupGlobalErrorHandling, errorTracker } from './middleware/logger';
+import { loggingMiddleware, setupGlobalErrorHandling, errorTracker, logger } from './middleware/logger';
 import { errorTracker as abuseDetector } from './middleware/abuseDetection';
 import { captureAuditContext, auditRateLimit, auditSecurityAlert } from './middleware/auditMiddleware';
-import { swaggerSpec } from './swagger';
+import { swaggerSpec, getVersionedSwaggerSpec } from './swagger';
+import { initializeCacheSystem } from './services/cacheService';
+import { advancedRateLimiter } from './middleware/advancedRateLimiter';
+import { apiVersioningConfig } from './config/apiVersioning';
+import cacheRoutes from './routes/cacheRoutes';
 import { upload } from './middleware/upload';
 import { uploadDocument } from './controllers/DocumentController';
 import { getDashboardData, generateReport, exportData } from './controllers/AnalyticsController';
@@ -14,6 +18,7 @@ import { applyPaymentSecurity, processPayment, getPaymentHistory, validatePaymen
 import { setupRateLimitRoutes } from './routes/rateLimitRoutes';
 import auditRoutes from './routes/auditRoutes';
 import fraudRoutes from './routes/fraudRoutes';
+import rssRoutes from './routes/rssRoutes';
 import { auditCleanupService } from './services/AuditCleanupService';
 import { registerAuditHandlers } from './databases/event-patterns/handlers/auditHandlers';
 import { EventBus } from './databases/event-patterns/EventBus';
@@ -102,6 +107,9 @@ app.use('/api/audit', auditRoutes);
 
 // 11b. Fraud detection API (ML scoring 0-100, manual review workflow, adaptive learning)
 app.use('/api/fraud', fraudRoutes);
+
+// 11c. RSS Feed endpoints
+app.use('/api/rss', rssRoutes);
 
 // 12. API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
