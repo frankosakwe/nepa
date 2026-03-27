@@ -95,23 +95,28 @@ export const TransactionHistoryPage: React.FC = () => {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="md:flex md:justify-between">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-lg font-medium text-gray-900">NEPA Payment System</h3>
-              <p className="text-gray-600">Secure utility payment management</p>
+          <div className="flex flex-col md:flex-row md:justify-between items-center gap-6">
+            <div className="text-center md:text-left">
+              <h3 className="text-lg font-semibold text-gray-900">NEPA Payment System</h3>
+              <p className="text-gray-600 mt-1">Secure utility payment management</p>
             </div>
             
-            <div className="flex space-x-6">
-              <a href="#" className="text-gray-600 hover:text-gray-900">
+            <div className="flex flex-wrap justify-center gap-6">
+              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">
+              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Terms of Service
               </a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">
+              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Support
               </a>
             </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-gray-100 text-center">
+            <p className="text-sm text-gray-500">
+              &copy; 2024 NEPA Platform. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
