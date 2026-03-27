@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Transaction, TransactionHistory, TransactionFilters, PaymentStatus } from '../types';
 import TransactionService from '../services/transactionService';
+import { Loading } from './Loading';
 import BookmarkService from '../services/bookmarkService';
 import { Star, Trash2, CheckCircle, FileText, Download } from 'lucide-react';
 import { AdvancedDataTable } from './AdvancedDataTable';
@@ -12,6 +13,8 @@ interface Props {
 export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [showFilters, setShowFilters] = useState(false);
@@ -69,6 +72,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
 
   const handleSearch = (searchTerm: string) => {
     if (searchTerm.trim()) {
+      setSearchLoading(true);
       TransactionService.searchTransactions(searchTerm, filters)
         .then(result => {
           setTransactions(result.transactions);
@@ -79,7 +83,8 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
             hasNextPage: result.hasNextPage,
           });
         })
-        .catch(err => setError(err instanceof Error ? err.message : 'Search failed'));
+        .catch(err => setError(err instanceof Error ? err.message : 'Search failed'))
+        .finally(() => setSearchLoading(false));
     } else {
       loadTransactions();
     }
@@ -95,9 +100,12 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
 
   const handleExportCSV = async () => {
     try {
+      setExportLoading(true);
       await TransactionService.exportToCSV(filters);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to export transactions');
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -139,8 +147,7 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
   if (loading && transactions.length === 0) {
     return (
       <div className={`flex justify-center items-center py-12 ${className}`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Loading transactions...</span>
+        <Loading size="lg" label="Loading transactions..." />
       </div>
     );
   }
@@ -166,10 +173,17 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
           
           <button
             onClick={handleExportCSV}
-            disabled={loading || transactions.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+            disabled={loading || exportLoading || transactions.length === 0}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors flex items-center gap-2"
           >
-            Export CSV
+            {exportLoading ? (
+              <>
+                <Loading size="sm" />
+                Exporting...
+              </>
+            ) : (
+              'Export CSV'
+            )}
           </button>
         </div>
       </div>
@@ -289,13 +303,127 @@ export const TransactionHistoryComponent: React.FC<Props> = ({ className = '' })
           <input
             type="text"
             placeholder="Search by transaction ID, meter ID, or amount..."
+            onChange={(e) => handleSearch(e.target.value)}
+            className="w-full px-4 py-3 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
             className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
+          {searchLoading && (
+            <div className="absolute right-3 top-3.5">
+              <Loading size="sm" />
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Transactions List */}
+      {loading && transactions.length > 0 && (
+        <div className="flex justify-center items-center py-8">
+          <Loading size="md" label="Updating transactions..." />
+        </div>
+      )}
+      
+      {filteredTransactions.length === 0 && !loading ? (
+        <div className="text-center py-12">
+          <div className="text-gray-500 text-lg">No transactions found</div>
+          <p className="text-gray-400 mt-2">Try adjusting your filters or search terms</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date & Time
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Transaction ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Meter ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredTransactions.map((transaction) => (
+                  <tr key={transaction.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {TransactionService.formatDate(transaction.date)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className="font-mono text-xs">{transaction.id}</span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {transaction.meterId}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {TransactionService.formatAmount(transaction.amount)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TransactionService.getStatusColor(transaction.status)}`}>
+                        <span className="mr-1">{TransactionService.getStatusIcon(transaction.status)}</span>
+                        {transaction.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleViewReceipt(transaction)}
+                          className="text-blue-600 hover:text-blue-900 font-medium"
+                        >
+                          View Receipt
+                        </button>
+                        <button
+                          onClick={() => handleDownloadReceipt(transaction.id)}
+                          className="text-green-600 hover:text-green-900 font-medium"
+                        >
+                          Download PDF
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="mt-6 flex justify-center items-center space-x-2">
+          <button
+            onClick={() => handleFilterChange('page', Math.max(1, pagination.currentPage - 1))}
+            disabled={pagination.currentPage <= 1}
+            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          
+          <span className="px-4 py-2">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+          
+          <button
+            onClick={() => handleFilterChange('page', Math.min(pagination.totalPages, pagination.currentPage + 1))}
+            disabled={pagination.currentPage >= pagination.totalPages}
+            className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
       {/* Transactions Table */}
       <TransactionHistoryTable 
         transactions={transactions}
