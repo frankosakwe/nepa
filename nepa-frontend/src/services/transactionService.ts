@@ -242,7 +242,7 @@ class TransactionService {
   /**
    * Format currency amount
    */
-  static formatAmount(amount: string | number): string {
+  public formatAmount(amount: string | number): string {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
@@ -253,7 +253,7 @@ class TransactionService {
   /**
    * Format date for display
    */
-  static formatDate(date: string | Date): string {
+  public formatDate(date: string | Date): string {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return new Intl.DateTimeFormat('en-NG', {
       year: 'numeric',
@@ -267,7 +267,7 @@ class TransactionService {
   /**
    * Get status color for UI
    */
-  static getStatusColor(status: string): string {
+  public getStatusColor(status: string): string {
     switch (status.toUpperCase()) {
       case 'SUCCESS':
         return 'text-green-600 bg-green-100';
@@ -285,7 +285,7 @@ class TransactionService {
   /**
    * Get status icon
    */
-  static getStatusIcon(status: string): string {
+  public getStatusIcon(status: string): string {
     switch (status.toUpperCase()) {
       case 'SUCCESS':
         return '✅';
