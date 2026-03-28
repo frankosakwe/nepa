@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 import { PubSub } from 'graphql-subscriptions';
+import { getFraudDetectionService, getFraudReviewService, buildTransactionFeatures } from '../../fraud';
 
 const prisma = new PrismaClient();
 const pubsub = new PubSub();
@@ -190,6 +191,83 @@ export const paymentResolvers = {
           },
           include: { user: true, bill: true },
         });
+
+        const req = context.req as { ip?: string; get?: (n: string) => string; headers?: Record<string, string> } | undefined;
+        const ipAddress = req?.ip ?? req?.get?.('x-forwarded-for') ?? req?.headers?.['x-forwarded-for'] ?? '';
+        const userAgent = req?.headers?.['user-agent'] ?? '';
+        const deviceId = req?.headers?.['x-device-id'] ?? '';
+
+        // Real-time fraud scoring (0-100) and pattern analysis
+        const fraudDetectionService = getFraudDetectionService();
+        const fraudReviewService = getFraudReviewService(prisma);
+        let fraudResult: { riskScore: number; riskLevel: string; shouldBlock: boolean; requiresManualReview: boolean } | null = null;
+
+        try {
+          const features = await buildTransactionFeatures({
+            prisma,
+            userId: context.user.id,
+            transactionId: payment.transactionId!,
+            amount: Number(finalAmount),
+            currency: input.currency ?? 'USD',
+            network: (input.network ?? 'STELLAR').toLowerCase(),
+            billId: input.billId,
+            ipAddress,
+            userAgent,
+            deviceId,
+          });
+          const fraudResponse = await fraudDetectionService.detectFraud({
+            transactionId: payment.transactionId!,
+            features,
+            userId: context.user.id,
+            ipAddress,
+            userAgent,
+            deviceId,
+            timestamp: new Date(),
+          });
+
+          if (fraudResponse.success && fraudResponse.result) {
+            fraudResult = {
+              riskScore: fraudResponse.result.riskScore,
+              riskLevel: fraudResponse.result.riskLevel,
+              shouldBlock: fraudResponse.result.shouldBlock,
+              requiresManualReview: fraudResponse.result.requiresManualReview,
+            };
+
+            await prisma.payment.update({
+              where: { id: payment.id },
+              data: {
+                fraudScore: fraudResponse.result.riskScore,
+                fraudRiskLevel: fraudResponse.result.riskLevel.toUpperCase() as any,
+                isBlocked: fraudResponse.result.shouldBlock,
+              },
+            });
+
+            if (fraudResponse.result.requiresManualReview || fraudResponse.result.shouldBlock) {
+              await fraudReviewService.createFraudCase(
+                fraudResponse.result,
+                payment.transactionId!,
+                context.user.id,
+                { fraudCaseId: payment.transactionId!, features }
+              );
+            }
+
+            if (fraudResponse.result.shouldBlock) {
+              return prisma.payment.findUnique({
+                where: { id: payment.id },
+                include: { user: true, bill: true },
+              }).then((p) => {
+                if (!p) return payment;
+                (p as any).fraudScore = fraudResponse.result!.riskScore;
+                (p as any).fraudRiskLevel = fraudResponse.result!.riskLevel;
+                (p as any).isBlocked = true;
+                (p as any).fraudBlocked = true;
+                return p;
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Fraud detection error (payment continues):', err);
+        }
 
         // Simulate payment processing (in real implementation, integrate with payment gateway)
         setTimeout(async () => {
