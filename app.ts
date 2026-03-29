@@ -6,6 +6,7 @@ import { apiKeyAuth } from './middleware/auth';
 import { authenticate, authorize, optionalAuth } from './middleware/authentication';
 import { loggingMiddleware, setupGlobalErrorHandling, errorTracker } from './middleware/logger';
 import { errorTracker as abuseDetector } from './middleware/abuseDetection';
+import { sanitizeInput, validateInput } from './middleware/inputSanitization';
 import { swaggerSpec } from './src/config/swagger';
 import { upload } from './src/utils/upload';
 import { uploadDocument } from './controllers/DocumentController';
@@ -59,16 +60,19 @@ configureSecurity(app);
 // 4. Body Parsing
 app.use(express.json({ limit: '10kb' })); // Limit body size for security
 
-// 5. Progressive Rate Limiting
+// 5. Input Sanitization
+app.use('/api', sanitizeInput);
+
+// 6. Progressive Rate Limiting
 app.use('/api', progressiveLimiter);
 
-// 6. General API Rate Limiting
+// 7. General API Rate Limiting
 app.use('/api', apiLimiter);
 
-// 7. Error tracking for abuse detection
+// 8. Error tracking for abuse detection
 app.use(abuseDetector);
 
-// 8. API Documentation
+// 9. API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // 9. Enhanced Health Check
@@ -113,9 +117,25 @@ app.get('/api/monitoring/metrics',
 // 11. Protected API Routes
 app.use('/api', apiKeyAuth);
 
-// Authentication endpoints with stricter rate limiting
-app.post('/api/auth/register', authLimiter, authController.register.bind(authController));
-app.post('/api/auth/login', authLimiter, authController.login.bind(authController));
+// Authentication endpoints with stricter rate limiting and validation
+app.post('/api/auth/register', 
+  authLimiter, 
+  validateInput({
+    email: { type: 'email', required: true },
+    password: { type: 'password', required: true },
+    firstName: { type: 'name', required: true },
+    lastName: { type: 'name', required: true }
+  }), 
+  authController.register.bind(authController)
+);
+app.post('/api/auth/login', 
+  authLimiter, 
+  validateInput({
+    email: { type: 'email', required: true },
+    password: { type: 'string', required: true }
+  }), 
+  authController.login.bind(authController)
+);
 app.post('/api/auth/wallet', authLimiter, authController.loginWithWallet.bind(authController));
 app.post('/api/auth/refresh', authLimiter, authController.refreshToken.bind(authController));
 app.post('/api/auth/logout', authenticate, authController.logout.bind(authController));
