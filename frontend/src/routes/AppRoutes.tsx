@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import DashboardPage from '../pages/DashboardPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
+import TreeViewPage from '../pages/TreeViewPage';
 import AuthPage from '../pages/AuthPage';
 import ProfilePage from '../pages/ProfilePage';
 import TransactionHistoryPage from '../pages/TransactionHistoryPage';
@@ -32,6 +33,14 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <AnalyticsPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/tree" 
+        element={
+          <ProtectedRoute>
+            <TreeViewPage />
           </ProtectedRoute>
         } 
       />
