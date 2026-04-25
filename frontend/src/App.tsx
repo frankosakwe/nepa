@@ -9,9 +9,14 @@ import { NotificationDemo } from './components/NotificationDemo';
 import { AdvancedSearch } from './components/AdvancedSearch';
 import { SearchResults } from './components/SearchResults';
 import { SearchAnalytics } from './components/SearchAnalytics';
+import { FilterPanel } from './components/FilterPanel';
+import { FilterBar } from './components/FilterBar';
+import { FilterAnalytics } from './components/FilterAnalytics';
+import { FilterDemo } from './components/FilterDemo';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { SearchProvider } from './contexts/SearchContext';
-import { Home, Zap, CreditCard, History, Settings, Clock, Table, Upload, Bell, Search } from 'lucide-react';
+import { FilterProvider } from './contexts/FilterContext';
+import { Home, Zap, CreditCard, History, Settings, Clock, Table, Upload, Bell, Search, Filter } from 'lucide-react';
 
 interface SidebarItem {
   id: string;
@@ -113,6 +118,12 @@ const App: React.FC = () => {
       label: 'Search',
       icon: <Search size={20} />,
       path: '/search'
+    },
+    {
+      id: 'filtering',
+      label: 'Filtering',
+      icon: <Filter size={20} />,
+      path: '/filtering'
     },
     {
       id: 'settings',
@@ -421,6 +432,20 @@ const App: React.FC = () => {
           </div>
         );
 
+      case 'filtering':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Filtering System</h2>
+              <p className="text-gray-600 mb-6">
+                Comprehensive filtering system with persistence, combinations, presets, and analytics.
+              </p>
+              
+              <FilterDemo />
+            </div>
+          </div>
+        );
+
       case 'settings':
         return (
           <div className="space-y-6">
@@ -478,49 +503,51 @@ const App: React.FC = () => {
   };
 
   return (
-    <SearchProvider>
-      <NotificationProvider>
-        <div className="min-h-screen bg-gray-50">
-          <div className="flex">
-            {/* Sidebar */}
-            <Sidebar
-              isOpen={sidebarOpen}
-              onToggle={() => setSidebarOpen(!sidebarOpen)}
-              activeItem={activeView}
-              onItemClick={handleSidebarItemClick}
-              collapsed={sidebarCollapsed}
-              onCollapsedChange={setSidebarCollapsed}
-            />
+    <FilterProvider>
+      <SearchProvider>
+        <NotificationProvider>
+          <div className="min-h-screen bg-gray-50">
+            <div className="flex">
+              {/* Sidebar */}
+              <Sidebar
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                activeItem={activeView}
+                onItemClick={handleSidebarItemClick}
+                collapsed={sidebarCollapsed}
+                onCollapsedChange={setSidebarCollapsed}
+              />
 
-            {/* Main Content */}
-            <div className={`flex-1 transition-all duration-300 ${
-              sidebarCollapsed ? 'ml-16' : 'ml-64'
-            }`}>
-              {/* Mobile Menu Toggle */}
-              <div className="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 rounded-lg hover:bg-gray-100"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                <h1 className="text-xl font-bold text-blue-600">NEPA 💡</h1>
+              {/* Main Content */}
+              <div className={`flex-1 transition-all duration-300 ${
+                sidebarCollapsed ? 'ml-16' : 'ml-64'
+              }`}>
+                {/* Mobile Menu Toggle */}
+                <div className="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between">
+                  <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="p-2 rounded-lg hover:bg-gray-100"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                  <h1 className="text-xl font-bold text-blue-600">NEPA 💡</h1>
+                </div>
+
+                {/* Page Content */}
+                <main className="p-6">
+                  {renderContent()}
+                </main>
               </div>
-
-              {/* Page Content */}
-              <main className="p-6">
-                {renderContent()}
-              </main>
             </div>
-          </div>
 
-          {/* Toast Container */}
-          <ToastContainer position="top-right" maxVisible={5} />
-        </div>
-      </NotificationProvider>
-    </SearchProvider>
+            {/* Toast Container */}
+            <ToastContainer position="top-right" maxVisible={5} />
+          </div>
+        </NotificationProvider>
+      </SearchProvider>
+    </FilterProvider>
   );
 };
 
