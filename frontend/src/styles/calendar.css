@@ -1,0 +1,363 @@
+/* Calendar Component Styles */
+.calendar {
+  @apply w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm;
+}
+
+.calendar-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.calendar-nav-button {
+  @apply p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
+}
+
+.calendar-month-year {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.calendar-grid {
+  @apply p-4;
+}
+
+.calendar-weekdays {
+  @apply grid grid-cols-7 gap-1 mb-2;
+}
+
+.calendar-week-header {
+  @apply text-xs font-medium text-gray-500 text-center p-2;
+}
+
+.calendar-weekday {
+  @apply text-xs font-medium text-gray-500 text-center p-2;
+}
+
+.calendar-weeks {
+  @apply space-y-1;
+}
+
+.calendar-week {
+  @apply grid grid-cols-7 gap-1;
+}
+
+.calendar-week-number {
+  @apply text-xs font-medium text-gray-400 text-center p-2;
+}
+
+.calendar-day {
+  @apply relative p-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+
+.calendar-day--current-month {
+  @apply text-gray-900;
+}
+
+.calendar-day--outside-month {
+  @apply text-gray-400;
+}
+
+.calendar-day--selected {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.calendar-day--today {
+  @apply font-bold text-blue-600;
+}
+
+.calendar-day--today.calendar-day--selected {
+  @apply text-white;
+}
+
+.calendar-day--weekend {
+  @apply text-red-600;
+}
+
+.calendar-day--weekend.calendar-day--selected {
+  @apply text-white;
+}
+
+.calendar-day--disabled {
+  @apply text-gray-300 cursor-not-allowed hover:bg-transparent;
+}
+
+.calendar-day-number {
+  @apply block text-center;
+}
+
+/* DatePicker Component Styles */
+.date-picker {
+  @apply relative w-full;
+}
+
+.date-picker-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.date-picker-required {
+  @apply text-red-500 ml-1;
+}
+
+.date-picker-input-wrapper {
+  @apply relative;
+}
+
+.date-picker-input {
+  @apply w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply disabled:bg-gray-100 disabled:cursor-not-allowed;
+  @apply transition-colors duration-200;
+}
+
+.date-picker-input--error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+.date-picker-toggle {
+  @apply absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded;
+}
+
+.date-picker-clear {
+  @apply absolute right-8 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-red-600;
+  @apply focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded;
+}
+
+.date-picker-error {
+  @apply mt-1 text-sm text-red-600;
+}
+
+.date-picker-calendar {
+  @apply absolute z-50 mt-1 p-4 bg-white border border-gray-200 rounded-lg shadow-lg;
+  @apply focus:outline-none;
+}
+
+/* DateRangePicker Component Styles */
+.date-range-picker {
+  @apply relative w-full;
+}
+
+.date-range-picker-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.date-range-picker-required {
+  @apply text-red-500 ml-1;
+}
+
+.date-range-picker-input-wrapper {
+  @apply relative;
+}
+
+.date-range-picker-input {
+  @apply w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg cursor-pointer;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply disabled:bg-gray-100 disabled:cursor-not-allowed;
+  @apply transition-colors duration-200;
+}
+
+.date-range-picker-input--error {
+  @apply border-red-500 focus:ring-red-500;
+}
+
+.date-range-picker-toggle {
+  @apply absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded;
+}
+
+.date-range-picker-clear {
+  @apply absolute right-8 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-red-600;
+  @apply focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded;
+}
+
+.date-range-picker-error {
+  @apply mt-1 text-sm text-red-600;
+}
+
+.date-range-picker-calendar {
+  @apply absolute z-50 mt-1 p-4 bg-white border border-gray-200 rounded-lg shadow-lg;
+  @apply focus:outline-none min-w-[320px];
+}
+
+.date-range-picker-selection-info {
+  @apply mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200;
+}
+
+.date-range-picker-selection-mode {
+  @apply text-sm font-medium text-blue-600 mb-1;
+}
+
+.date-range-picker-selected-start,
+.date-range-picker-selected-end {
+  @apply text-xs text-gray-600;
+}
+
+.date-range-picker-calendar-grid .calendar-day--in-range {
+  @apply bg-blue-100 text-blue-900;
+}
+
+.date-range-picker-calendar-grid .calendar-day--range-start {
+  @apply bg-blue-600 text-white;
+}
+
+.date-range-picker-calendar-grid .calendar-day--range-end {
+  @apply bg-blue-600 text-white;
+}
+
+.date-range-picker-calendar-grid .calendar-day--hovered {
+  @apply bg-blue-50;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .calendar {
+    @apply max-w-full;
+  }
+  
+  .calendar-header {
+    @apply p-3;
+  }
+  
+  .calendar-grid {
+    @apply p-3;
+  }
+  
+  .calendar-weekday {
+    @apply text-xs p-1;
+  }
+  
+  .calendar-day {
+    @apply p-1 text-xs;
+  }
+  
+  .date-picker-calendar,
+  .date-range-picker-calendar {
+    @apply fixed inset-x-4 top-auto bottom-4 mt-0 mb-4;
+    @apply max-h-[70vh] overflow-y-auto;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .calendar {
+    @apply bg-gray-800 border-gray-600;
+  }
+  
+  .calendar-header {
+    @apply border-gray-600;
+  }
+  
+  .calendar-nav-button {
+    @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+  }
+  
+  .calendar-month-year {
+    @apply text-gray-100;
+  }
+  
+  .calendar-weekday {
+    @apply text-gray-400;
+  }
+  
+  .calendar-day--current-month {
+    @apply text-gray-100;
+  }
+  
+  .calendar-day--outside-month {
+    @apply text-gray-500;
+  }
+  
+  .calendar-day {
+    @apply text-gray-300 hover:bg-gray-700;
+  }
+  
+  .calendar-day--selected {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  
+  .calendar-day--today {
+    @apply text-blue-400;
+  }
+  
+  .calendar-day--weekend {
+    @apply text-red-400;
+  }
+  
+  .date-picker-input,
+  .date-range-picker-input {
+    @apply bg-gray-700 border-gray-600 text-gray-100;
+  }
+  
+  .date-picker-calendar,
+  .date-range-picker-calendar {
+    @apply bg-gray-800 border-gray-600;
+  }
+  
+  .date-range-picker-selection-info {
+    @apply bg-gray-700 border-gray-600;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .calendar {
+    @apply border-2 border-gray-900;
+  }
+  
+  .calendar-day {
+    @apply border border-gray-400;
+  }
+  
+  .calendar-day--selected {
+    @apply border-2 border-blue-700;
+  }
+  
+  .calendar-day--today {
+    @apply border-2 border-blue-600;
+  }
+  
+  .date-picker-input,
+  .date-range-picker-input {
+    @apply border-2 border-gray-900;
+  }
+  
+  .date-picker-input:focus,
+  .date-range-picker-input:focus {
+    @apply border-2 border-blue-700;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .calendar-day,
+  .calendar-nav-button,
+  .date-picker-toggle,
+  .date-picker-clear,
+  .date-range-picker-toggle,
+  .date-range-picker-clear {
+    @apply transition-none;
+  }
+}
+
+/* Focus Visible Support */
+.calendar-day:focus-visible,
+.calendar-nav-button:focus-visible,
+.date-picker-toggle:focus-visible,
+.date-picker-clear:focus-visible,
+.date-range-picker-toggle:focus-visible,
+.date-range-picker-clear:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Print Styles */
+@media print {
+  .calendar {
+    @apply border border-gray-900 shadow-none;
+  }
+  
+  .date-picker-calendar,
+  .date-range-picker-calendar {
+    @apply hidden;
+  }
+}

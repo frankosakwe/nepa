@@ -61,11 +61,41 @@ export interface TranslationDictionary {
     title: string;
     description: string;
     instruction: string;
+    selectedNodeLabel: string;
   };
   language: {
     label: string;
     english: string;
     spanish: string;
+  };
+  calendar: {
+    ariaLabel: string;
+    previousMonth: string;
+    nextMonth: string;
+    week: string;
+    today: string;
+    selected: string;
+    disabled: string;
+  };
+  datePicker: {
+    toggleCalendar: string;
+    clear: string;
+    calendarLabel: string;
+    error: {
+      minDate: string;
+      maxDate: string;
+      invalidFormat: string;
+    };
+  };
+  dateRangePicker: {
+    toggleCalendar: string;
+    clear: string;
+    calendarLabel: string;
+    selectingStart: string;
+    selectingEnd: string;
+    start: string;
+    end: string;
+    selectEnd: string;
   };
 }
 
@@ -138,6 +168,35 @@ export const translations: Record<Language, TranslationDictionary> = {
       english: 'English',
       spanish: 'Spanish',
     },
+    calendar: {
+      ariaLabel: 'Calendar',
+      previousMonth: 'Previous month',
+      nextMonth: 'Next month',
+      week: 'Wk',
+      today: 'Today',
+      selected: 'Selected',
+      disabled: 'Disabled',
+    },
+    datePicker: {
+      toggleCalendar: 'Toggle calendar',
+      clear: 'Clear date',
+      calendarLabel: 'Date picker calendar',
+      error: {
+        minDate: 'Date is before minimum allowed date',
+        maxDate: 'Date is after maximum allowed date',
+        invalidFormat: 'Invalid date format',
+      },
+    },
+    dateRangePicker: {
+      toggleCalendar: 'Toggle calendar',
+      clear: 'Clear date range',
+      calendarLabel: 'Date range picker calendar',
+      selectingStart: 'Selecting start date',
+      selectingEnd: 'Selecting end date',
+      start: 'Start',
+      end: 'End',
+      selectEnd: 'Select end',
+    },
   },
   es: {
     appTitle: 'Plataforma NEPA',
@@ -206,6 +265,35 @@ export const translations: Record<Language, TranslationDictionary> = {
       label: 'Idioma',
       english: 'Inglés',
       spanish: 'Español',
+    },
+    calendar: {
+      ariaLabel: 'Calendario',
+      previousMonth: 'Mes anterior',
+      nextMonth: 'Siguiente mes',
+      week: 'Sem',
+      today: 'Hoy',
+      selected: 'Seleccionado',
+      disabled: 'Deshabilitado',
+    },
+    datePicker: {
+      toggleCalendar: 'Alternar calendario',
+      clear: 'Limpiar fecha',
+      calendarLabel: 'Calendario selector de fecha',
+      error: {
+        minDate: 'La fecha es anterior a la mínima permitida',
+        maxDate: 'La fecha es posterior a la máxima permitida',
+        invalidFormat: 'Formato de fecha inválido',
+      },
+    },
+    dateRangePicker: {
+      toggleCalendar: 'Alternar calendario',
+      clear: 'Limpiar rango de fechas',
+      calendarLabel: 'Calendario selector de rango de fechas',
+      selectingStart: 'Seleccionando fecha de inicio',
+      selectingEnd: 'Seleccionando fecha de fin',
+      start: 'Inicio',
+      end: 'Fin',
+      selectEnd: 'Seleccionar fin',
     },
   },
 };
