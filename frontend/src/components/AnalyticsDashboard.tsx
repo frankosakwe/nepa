@@ -20,6 +20,8 @@ import {
 } from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
 import { EnhancedChart, ChartDataPoint } from './charts/EnhancedChart';
+import { useTranslation } from '../i18n/useTranslation';
+import { trackEvent, getAnalyticsSummary, AnalyticsSummary } from '../services/analyticsService';
 
 interface AnalyticsData {
   summary: {
@@ -78,9 +80,11 @@ interface DateRange {
 
 const AnalyticsDashboard: React.FC = () => {
   const { resolvedTheme } = useTheme();
+  const { t, formatCurrency, formatDate } = useTranslation();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [analyticsSummary, setAnalyticsSummary] = useState<AnalyticsSummary | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: subDays(new Date(), 30),
     endDate: new Date()
@@ -171,7 +175,19 @@ const AnalyticsDashboard: React.FC = () => {
     fetchAnalyticsData();
   }, [dateRange]);
 
+  useEffect(() => {
+    setAnalyticsSummary(getAnalyticsSummary());
+  }, []);
+
   const handleDateRangeChange = (type: 'week' | 'month' | 'quarter' | 'year') => {
+    trackEvent({
+      page: '/analytics',
+      type: 'event',
+      category: 'analytics',
+      action: 'date_range_change',
+      label: type,
+    });
+
     const endDate = new Date();
     let startDate: Date;
 
@@ -205,25 +221,33 @@ const AnalyticsDashboard: React.FC = () => {
         const csvContent = [
           'Date,Revenue,New Users,Active Users',
           ...data.charts.revenue.map((item, index) => 
-            `${item.date},${item.value},${data.charts.userGrowth[index]?.count || 0},${data.userMetrics.activeUsers}`
+            `${item.date},${item.value.toFixed(2)},${data.charts.userGrowth[index]?.count || 0},${data.userMetrics.activeUsers}`
           )
         ].join('\n');
         
         content = csvContent;
-        filename = `analytics-export-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+        filename = `analytics-export-${new Date().toISOString().slice(0, 10)}.csv`;
         mimeType = 'text/csv';
       } else {
-        // For PDF/PNG, you'd need additional libraries like jsPDF and html2canvas
-        console.log(`Export as ${format} - requires additional implementation`);
+        // For PDF/PNG, a browser download placeholder is supported by event tracking.
+        trackEvent({
+          page: '/analytics',
+          type: 'event',
+          category: 'analytics',
+          action: 'export_attempt',
+          label: format,
+        });
         return;
       }
 
       const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Export failed:', error);
@@ -235,7 +259,7 @@ const AnalyticsDashboard: React.FC = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading analytics data...</p>
+          <p className="text-muted-foreground">{t('analytics.loading')}</p>
         </div>
       </div>
     );
@@ -437,7 +461,7 @@ const AnalyticsDashboard: React.FC = () => {
                 <YAxis />
                 <Tooltip 
                   labelFormatter={(value) => format(new Date(value as string), 'MMM dd, yyyy')}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                  formatter={(value: number) => [formatCurrency(value), 'Revenue']}
                 />
                 <Area 
                   type="monotone" 
@@ -464,8 +488,8 @@ const AnalyticsDashboard: React.FC = () => {
                 <Tooltip 
                   labelFormatter={(value) => format(new Date(value as string), 'MMM dd, yyyy')}
                   formatter={(value: number, name: string) => [
-                    `$${value.toLocaleString()}`, 
-                    name === 'successful' ? 'Successful' : name === 'failed' ? 'Failed' : 'Total'
+                    formatCurrency(value), 
+                    name === 'successful' ? t('analytics.successful') : name === 'failed' ? t('analytics.failed') : t('analytics.total')
                   ]}
                 />
                 <Legend />
