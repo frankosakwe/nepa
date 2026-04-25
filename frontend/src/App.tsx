@@ -3,7 +3,20 @@ import Sidebar from './components/Sidebar';
 import TimePicker from './components/TimePicker';
 import PaymentIntegration from './components/PaymentIntegration';
 import DataTable from './components/DataTable';
-import { Home, Zap, CreditCard, History, Settings, Clock, Table } from 'lucide-react';
+import { AdvancedFileUpload } from './components/AdvancedFileUpload';
+import { ToastContainer } from './components/ToastContainer';
+import { NotificationDemo } from './components/NotificationDemo';
+import { AdvancedSearch } from './components/AdvancedSearch';
+import { SearchResults } from './components/SearchResults';
+import { SearchAnalytics } from './components/SearchAnalytics';
+import { FilterPanel } from './components/FilterPanel';
+import { FilterBar } from './components/FilterBar';
+import { FilterAnalytics } from './components/FilterAnalytics';
+import { FilterDemo } from './components/FilterDemo';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { SearchProvider } from './contexts/SearchContext';
+import { FilterProvider } from './contexts/FilterContext';
+import { Home, Zap, CreditCard, History, Settings, Clock, Table, Upload, Bell, Search, Filter } from 'lucide-react';
 
 interface SidebarItem {
   id: string;
@@ -87,6 +100,30 @@ const App: React.FC = () => {
       label: 'Time Picker Demo',
       icon: <Clock size={20} />,
       path: '/time-picker'
+    },
+    {
+      id: 'file-upload',
+      label: 'File Upload',
+      icon: <Upload size={20} />,
+      path: '/file-upload'
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: <Bell size={20} />,
+      path: '/notifications'
+    },
+    {
+      id: 'search',
+      label: 'Search',
+      icon: <Search size={20} />,
+      path: '/search'
+    },
+    {
+      id: 'filtering',
+      label: 'Filtering',
+      icon: <Filter size={20} />,
+      path: '/filtering'
     },
     {
       id: 'settings',
@@ -289,6 +326,126 @@ const App: React.FC = () => {
           </div>
         );
 
+      case 'file-upload':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">File Upload</h2>
+              <p className="text-gray-600 mb-6">
+                Advanced file upload component with drag-and-drop, progress indicators, file validation, and error handling.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">General File Upload</h3>
+                  <AdvancedFileUpload
+                    onUploadComplete={(files) => console.log('Upload completed:', files)}
+                    onFileSelect={(files) => console.log('Files selected:', files)}
+                    maxFiles={5}
+                    maxSize={10 * 1024 * 1024} // 10MB
+                    allowedExtensions={['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx']}
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Images Only</h3>
+                  <AdvancedFileUpload
+                    onUploadComplete={(files) => console.log('Images uploaded:', files)}
+                    maxFiles={3}
+                    maxSize={5 * 1024 * 1024} // 5MB
+                    allowedTypes={['image/jpeg', 'image/png', 'image/gif']}
+                    allowedExtensions={['.jpg', '.jpeg', '.png', '.gif']}
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Manual Upload Mode</h3>
+                  <AdvancedFileUpload
+                    onUploadComplete={(files) => console.log('Manual upload completed:', files)}
+                    autoUpload={false}
+                    maxFiles={10}
+                    maxSize={20 * 1024 * 1024} // 20MB
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'notifications':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Notification System</h2>
+              <p className="text-gray-600 mb-6">
+                Comprehensive toast notification system with multiple types, positions, and accessibility features.
+              </p>
+              
+              <NotificationDemo />
+            </div>
+          </div>
+        );
+
+      case 'search':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Search System</h2>
+              <p className="text-gray-600 mb-6">
+                Advanced search functionality with suggestions, filters, history, and analytics.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Search Interface</h3>
+                  <AdvancedSearch
+                    onSearch={(query, filters) => console.log('Search:', query, filters)}
+                    suggestions={[
+                      { id: '1', text: 'meter readings', type: 'meter' },
+                      { id: '2', text: 'payment history', type: 'payment' },
+                      { id: '3', text: 'user accounts', type: 'user' },
+                      { id: '4', text: 'transaction details', type: 'payment' }
+                    ]}
+                    filters={[
+                      { id: 'type', label: 'Type', field: 'type', type: 'select', options: [
+                        { value: 'meter', label: 'Meters' },
+                        { value: 'payment', label: 'Payments' },
+                        { value: 'user', label: 'Users' }
+                      ]},
+                      { id: 'dateRange', label: 'Date Range', field: 'date', type: 'date' },
+                      { id: 'amount', label: 'Amount Range', field: 'amount', type: 'range', min: 0, max: 10000 }
+                    ]}
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Search Results</h3>
+                  <SearchResults />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Search Analytics</h3>
+                  <SearchAnalytics />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'filtering':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Filtering System</h2>
+              <p className="text-gray-600 mb-6">
+                Comprehensive filtering system with persistence, combinations, presets, and analytics.
+              </p>
+              
+              <FilterDemo />
+            </div>
+          </div>
+        );
+
       case 'settings':
         return (
           <div className="space-y-6">
@@ -386,6 +543,51 @@ const App: React.FC = () => {
         </div>
       </div>
     </div>
+    <FilterProvider>
+      <SearchProvider>
+        <NotificationProvider>
+          <div className="min-h-screen bg-gray-50">
+            <div className="flex">
+              {/* Sidebar */}
+              <Sidebar
+                isOpen={sidebarOpen}
+                onToggle={() => setSidebarOpen(!sidebarOpen)}
+                activeItem={activeView}
+                onItemClick={handleSidebarItemClick}
+                collapsed={sidebarCollapsed}
+                onCollapsedChange={setSidebarCollapsed}
+              />
+
+              {/* Main Content */}
+              <div className={`flex-1 transition-all duration-300 ${
+                sidebarCollapsed ? 'ml-16' : 'ml-64'
+              }`}>
+                {/* Mobile Menu Toggle */}
+                <div className="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between">
+                  <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="p-2 rounded-lg hover:bg-gray-100"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </button>
+                  <h1 className="text-xl font-bold text-blue-600">NEPA 💡</h1>
+                </div>
+
+                {/* Page Content */}
+                <main className="p-6">
+                  {renderContent()}
+                </main>
+              </div>
+            </div>
+
+            {/* Toast Container */}
+            <ToastContainer position="top-right" maxVisible={5} />
+          </div>
+        </NotificationProvider>
+      </SearchProvider>
+    </FilterProvider>
   );
 };
 
