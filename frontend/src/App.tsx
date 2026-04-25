@@ -3,7 +3,8 @@ import Sidebar from './components/Sidebar';
 import TimePicker from './components/TimePicker';
 import PaymentIntegration from './components/PaymentIntegration';
 import DataTable from './components/DataTable';
-import { Home, Zap, CreditCard, History, Settings, Clock, Table } from 'lucide-react';
+import AdvancedFileUpload from './components/AdvancedFileUpload';
+import { Home, Zap, CreditCard, History, Settings, Clock, Table, Upload } from 'lucide-react';
 
 interface SidebarItem {
   id: string;
@@ -87,6 +88,12 @@ const App: React.FC = () => {
       label: 'Time Picker Demo',
       icon: <Clock size={20} />,
       path: '/time-picker'
+    },
+    {
+      id: 'file-upload',
+      label: 'File Upload',
+      icon: <Upload size={20} />,
+      path: '/file-upload'
     },
     {
       id: 'settings',
@@ -282,6 +289,52 @@ const App: React.FC = () => {
                     value="10:00 AM"
                     onChange={(time) => console.log('Time changed:', time)}
                     disabled={true}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'file-upload':
+        return (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">File Upload</h2>
+              <p className="text-gray-600 mb-6">
+                Advanced file upload component with drag-and-drop, progress indicators, file validation, and error handling.
+              </p>
+              
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">General File Upload</h3>
+                  <AdvancedFileUpload
+                    onUploadComplete={(files) => console.log('Upload completed:', files)}
+                    onFileSelect={(files) => console.log('Files selected:', files)}
+                    maxFiles={5}
+                    maxSize={10 * 1024 * 1024} // 10MB
+                    allowedExtensions={['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx']}
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Images Only</h3>
+                  <AdvancedFileUpload
+                    onUploadComplete={(files) => console.log('Images uploaded:', files)}
+                    maxFiles={3}
+                    maxSize={5 * 1024 * 1024} // 5MB
+                    allowedTypes={['image/jpeg', 'image/png', 'image/gif']}
+                    allowedExtensions={['.jpg', '.jpeg', '.png', '.gif']}
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Manual Upload Mode</h3>
+                  <AdvancedFileUpload
+                    onUploadComplete={(files) => console.log('Manual upload completed:', files)}
+                    autoUpload={false}
+                    maxFiles={10}
+                    maxSize={20 * 1024 * 1024} // 20MB
                   />
                 </div>
               </div>
