@@ -13,6 +13,7 @@
 @import './styles/tablet-responsive.css';
 @import './styles/print-styles.css';
 @import './styles/print-components.css';
+@import './styles/breadcrumbs.css';
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

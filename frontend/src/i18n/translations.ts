@@ -114,6 +114,26 @@ export interface TranslationDictionary {
     confidential: string;
     watermark: string;
   };
+  breadcrumbs: {
+    navigation: string;
+    home: string;
+    dashboard: string;
+    analytics: string;
+    transactions: string;
+    profile: string;
+    settings: string;
+    payment: string;
+    faq: string;
+    auth: string;
+    tree: string;
+    more: string;
+    back: string;
+    currentPage: string;
+    menu: string;
+    loading: string;
+    error: string;
+    noBreadcrumbs: string;
+  };
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -201,6 +221,26 @@ export const translations: Record<Language, TranslationDictionary> = {
       poweredBy: 'Powered by NEPA',
       confidential: 'Confidential',
       watermark: 'DRAFT',
+    },
+    breadcrumbs: {
+      navigation: 'Breadcrumb navigation',
+      home: 'Home',
+      dashboard: 'Dashboard',
+      analytics: 'Analytics',
+      transactions: 'Transactions',
+      profile: 'Profile',
+      settings: 'Settings',
+      payment: 'Payment',
+      faq: 'FAQ',
+      auth: 'Authentication',
+      tree: 'Tree View',
+      more: 'more',
+      back: 'Back',
+      currentPage: 'Current page',
+      menu: 'Menu',
+      loading: 'Loading',
+      error: 'Error',
+      noBreadcrumbs: 'No breadcrumbs available',
     },
     calendar: {
       ariaLabel: 'Calendar',
@@ -316,6 +356,26 @@ export const translations: Record<Language, TranslationDictionary> = {
       poweredBy: 'Desarrollado por NEPA',
       confidential: 'Confidencial',
       watermark: 'BORRADOR',
+    },
+    breadcrumbs: {
+      navigation: 'Navegación de migas de pan',
+      home: 'Inicio',
+      dashboard: 'Panel',
+      analytics: 'Analítica',
+      transactions: 'Transacciones',
+      profile: 'Perfil',
+      settings: 'Configuración',
+      payment: 'Pago',
+      faq: 'Preguntas',
+      auth: 'Autenticación',
+      tree: 'Vista de árbol',
+      more: 'más',
+      back: 'Atrás',
+      currentPage: 'Página actual',
+      menu: 'Menú',
+      loading: 'Cargando',
+      error: 'Error',
+      noBreadcrumbs: 'No hay migas de pan disponibles',
     },
     calendar: {
       ariaLabel: 'Calendario',
