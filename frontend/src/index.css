@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'tailwindcss';
+@import './styles/calendar.css';
 @import './styles/design-system.css';
 @import './styles/theme.css';
 @import './styles/loading-states.css';
@@ -9,6 +11,8 @@
 @import './styles/responsive-enhancements.css';
 @import './styles/dark-mode-enhancements.css';
 @import './styles/tablet-responsive.css';
+@import './styles/print-styles.css';
+@import './styles/print-components.css';
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

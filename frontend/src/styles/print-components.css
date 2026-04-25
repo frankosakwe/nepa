@@ -1,0 +1,349 @@
+/* Print Component Styles */
+
+/* Print Button Component */
+.print-button-container {
+  @apply flex flex-col items-center gap-2;
+}
+
+.print-button-group {
+  @apply flex items-center gap-2;
+}
+
+.print-button {
+  @apply flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-colors duration-200;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.print-button-primary {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.print-button-secondary {
+  @apply bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 focus:ring-gray-500;
+}
+
+.print-button:disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-white hover:text-gray-700;
+}
+
+.print-button-text {
+  @apply text-sm;
+}
+
+.print-status {
+  @apply flex items-center gap-2 text-sm text-gray-600 mt-2;
+}
+
+.print-spinner {
+  @apply w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin;
+}
+
+/* Print Preview Component */
+.print-preview-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+}
+
+.print-preview-modal {
+  @apply bg-white rounded-lg shadow-xl max-w-6xl max-h-[90vh] w-full flex flex-col;
+}
+
+.print-preview-header {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.print-preview-title {
+  @apply flex items-center gap-4;
+}
+
+.print-preview-title h3 {
+  @apply text-lg font-semibold text-gray-900 m-0;
+}
+
+.print-preview-scale {
+  @apply text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded;
+}
+
+.print-preview-controls {
+  @apply flex items-center gap-4;
+}
+
+.print-preview-zoom {
+  @apply flex items-center gap-1;
+}
+
+.print-preview-zoom-btn {
+  @apply w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.print-preview-zoom-btn:disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-white;
+}
+
+.print-preview-actions {
+  @apply flex items-center gap-2;
+}
+
+.print-preview-action-btn {
+  @apply flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.print-preview-action-primary {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.print-preview-action-text {
+  @apply text-sm;
+}
+
+.print-preview-content {
+  @apply flex-1 overflow-auto p-4 bg-gray-50;
+}
+
+.print-preview-viewport {
+  @apply bg-white shadow-lg rounded-lg transition-transform duration-200 origin-top-left;
+  min-height: 400px;
+}
+
+.print-preview-document {
+  @apply p-6;
+}
+
+.print-preview-footer {
+  @apply flex items-center justify-between p-4 border-t border-gray-200 bg-gray-50;
+}
+
+.print-preview-info {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.print-preview-loading {
+  @apply absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-60;
+}
+
+.print-preview-loading-spinner {
+  @apply w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mr-3;
+}
+
+/* Print Layout Component */
+.print-layout {
+  @apply relative bg-white text-black;
+  min-height: 297mm; /* A4 height */
+}
+
+.print-watermark {
+  @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-45 text-6xl font-bold text-gray-200 pointer-events-none z-0;
+  opacity: 0.3;
+}
+
+.print-layout-header {
+  @apply relative z-10 mb-6;
+}
+
+.print-layout-content {
+  @apply relative z-10;
+}
+
+.print-layout-footer {
+  @apply relative z-10 mt-6 pt-4 border-t border-gray-300;
+}
+
+/* Default Print Header */
+.print-default-header {
+  @apply mb-6;
+}
+
+.print-header-content {
+  @apply flex justify-between items-start;
+}
+
+.print-header-left {
+  @apply flex-1;
+}
+
+.print-header-title {
+  @apply text-2xl font-bold text-black mb-2;
+}
+
+.print-header-subtitle {
+  @apply text-lg text-gray-700 mb-1;
+}
+
+.print-header-right {
+  @apply text-right;
+}
+
+.print-header-logo {
+  @apply mb-2;
+}
+
+.print-logo-text {
+  @apply text-xl font-bold text-black;
+}
+
+.print-header-meta {
+  @apply text-sm text-gray-600;
+}
+
+.print-header-date {
+  @apply mb-1;
+}
+
+.print-header-page {
+  @apply font-medium;
+}
+
+/* Default Print Footer */
+.print-default-footer {
+  @apply mt-8;
+}
+
+.print-footer-content {
+  @apply flex justify-between items-center text-sm text-gray-600;
+}
+
+.print-footer-left {
+  @apply text-left;
+}
+
+.print-footer-company {
+  @apply font-medium;
+}
+
+.print-footer-center {
+  @apply text-center;
+}
+
+.print-footer-confidential {
+  @apply font-medium text-red-600;
+}
+
+.print-footer-right {
+  @apply text-right;
+}
+
+.print-footer-page {
+  @apply font-medium;
+}
+
+/* Print Page Numbers */
+.print-page-numbers {
+  @apply text-center text-sm text-gray-600 mt-4;
+}
+
+/* Print Utilities */
+.printing {
+  @apply overflow-hidden;
+}
+
+.printing * {
+  @apply transition-none;
+}
+
+.print-preview-mode {
+  @apply overflow-hidden;
+}
+
+.print-preview-mode * {
+  @apply transition-none;
+}
+
+/* Responsive Print Preview */
+@media (max-width: 768px) {
+  .print-preview-modal {
+    @apply max-w-full max-h-full m-4 rounded-none;
+  }
+  
+  .print-preview-header {
+    @apply flex-col gap-4 items-stretch;
+  }
+  
+  .print-preview-controls {
+    @apply justify-center;
+  }
+  
+  .print-preview-actions {
+    @apply flex-col;
+  }
+  
+  .print-preview-viewport {
+    @apply transform scale-75;
+  }
+}
+
+/* Print-specific overrides for components */
+@media print {
+  .print-button-container,
+  .print-preview-overlay,
+  .print-preview-modal,
+  .print-preview-header,
+  .print-preview-footer,
+  .print-preview-loading {
+    display: none !important;
+  }
+  
+  .print-layout {
+    @apply block;
+  }
+  
+  .print-watermark {
+    @apply text-gray-100;
+  }
+}
+
+/* Animation for print spinner */
+@keyframes print-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.print-spinner,
+.print-preview-loading-spinner {
+  animation: print-spin 1s linear infinite;
+}
+
+/* Focus styles for accessibility */
+.print-button:focus-visible,
+.print-preview-zoom-btn:focus-visible,
+.print-preview-action-btn:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Screen reader only text */
+.screen-reader-only {
+  @apply sr-only;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .print-button {
+    @apply border-2 border-black;
+  }
+  
+  .print-preview-modal {
+    @apply border-2 border-black;
+  }
+  
+  .print-preview-viewport {
+    @apply border-2 border-black;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .print-button,
+  .print-preview-action-btn,
+  .print-preview-viewport {
+    @apply transition-none;
+  }
+  
+  .print-spinner,
+  .print-preview-loading-spinner {
+    animation: none;
+  }
+}

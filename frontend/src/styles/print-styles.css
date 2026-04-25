@@ -1,0 +1,546 @@
+/* NEPA Platform Print Styles */
+
+/* Print Media Query */
+@media print {
+  /* Page Setup */
+  @page {
+    size: A4;
+    margin: 2cm;
+    
+    /* Named pages for different sections */
+    @page header {
+      size: A4;
+      margin-top: 1cm;
+      margin-bottom: 1cm;
+    }
+    
+    @page footer {
+      size: A4;
+      margin-top: 1cm;
+      margin-bottom: 1cm;
+    }
+  }
+
+  /* Base Print Styles */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.4;
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    display: block !important;
+    place-items: initial !important;
+    min-height: auto !important;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  h1 { font-size: 18pt; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 14pt; }
+  h4 { font-size: 13pt; }
+  h5 { font-size: 12pt; }
+  h6 { font-size: 11pt; }
+
+  p {
+    margin: 0.5em 0;
+    orphans: 3;
+    widows: 3;
+    page-break-inside: avoid;
+  }
+
+  /* Links */
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background-color: #f0f0f0 !important;
+    font-weight: bold;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin: 1em 0;
+    padding-left: 2em;
+  }
+
+  li {
+    margin: 0.3em 0;
+    page-break-inside: avoid;
+  }
+
+  /* Images */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Forms */
+  input, textarea, select {
+    border: 1px solid #000 !important;
+    background: white !important;
+    color: black !important;
+    padding: 4px;
+  }
+
+  input[type="checkbox"], input[type="radio"] {
+    border: 1px solid #000 !important;
+  }
+
+  /* Buttons */
+  button, .btn {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #000 !important;
+    padding: 4px 8px;
+    cursor: default;
+  }
+
+  /* Hide Interactive Elements */
+  .no-print, 
+  .sidebar, 
+  .navigation, 
+  .navbar, 
+  .menu, 
+  .tabs,
+  .modal,
+  .dropdown,
+  .tooltip,
+  .popover,
+  .calendar-popup,
+  .date-picker-calendar,
+  .date-range-picker-calendar {
+    display: none !important;
+  }
+
+  /* Component-Specific Print Styles */
+  .card {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+    margin-bottom: 1em;
+    page-break-inside: avoid;
+  }
+
+  .card-header {
+    border-bottom: 1px solid #000 !important;
+  }
+
+  .card-footer {
+    border-top: 1px solid #000 !important;
+  }
+
+  .badge {
+    border: 1px solid #000 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .alert {
+    border: 1px solid #000 !important;
+    page-break-inside: avoid;
+  }
+
+  .progress {
+    border: 1px solid #000 !important;
+    background: white !important;
+  }
+
+  .progress-bar {
+    background: black !important;
+  }
+
+  /* Layout Utilities */
+  .print-break-before {
+    page-break-before: always;
+  }
+
+  .print-break-after {
+    page-break-after: always;
+  }
+
+  .print-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+
+  .print-keep-together {
+    page-break-inside: avoid;
+  }
+
+  /* Print Headers */
+  .print-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2cm;
+    text-align: center;
+    border-bottom: 1px solid #000;
+    padding: 10px 0;
+    font-size: 10pt;
+    font-weight: bold;
+  }
+
+  .print-header-title {
+    font-size: 14pt;
+    margin-bottom: 5px;
+  }
+
+  .print-header-date {
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Print Footers */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2cm;
+    text-align: center;
+    border-top: 1px solid #000;
+    padding: 10px 0;
+    font-size: 9pt;
+    color: #666;
+  }
+
+  .print-footer-page {
+    position: absolute;
+    right: 20px;
+    bottom: 10px;
+  }
+
+  /* Page Numbers */
+  @page {
+    @bottom-center {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 9pt;
+      color: #666;
+    }
+  }
+
+  /* Special Print Sections */
+  .print-only {
+    display: block !important;
+  }
+
+  .print-title {
+    font-size: 20pt;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 0 1em 0;
+    page-break-after: avoid;
+  }
+
+  .print-subtitle {
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 1em 0 0.5em 0;
+    page-break-after: avoid;
+  }
+
+  .print-section {
+    margin: 2em 0;
+    page-break-inside: avoid;
+  }
+
+  .print-summary {
+    border: 2px solid #000;
+    padding: 1em;
+    margin: 1em 0;
+    background: #f9f9f9 !important;
+  }
+
+  .print-summary-title {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+  }
+
+  /* Data Tables Print Styles */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: 10pt;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: left;
+  }
+
+  .print-table th {
+    background-color: #e0e0e0 !important;
+    font-weight: bold;
+  }
+
+  .print-table-striped tr:nth-child(even) {
+    background-color: #f5f5f5 !important;
+  }
+
+  /* Charts and Graphs */
+  .chart-container,
+  .recharts-wrapper {
+    page-break-inside: avoid;
+    margin: 1em 0;
+  }
+
+  /* Dashboard Specific */
+  .dashboard-grid {
+    display: block !important;
+  }
+
+  .dashboard-card {
+    border: 1px solid #000 !important;
+    margin-bottom: 1em !important;
+    page-break-inside: avoid;
+  }
+
+  /* Payment Form Print Styles */
+  .payment-form {
+    border: 1px solid #000 !important;
+    padding: 1em;
+    margin: 1em 0;
+  }
+
+  .payment-form-field {
+    margin-bottom: 0.8em;
+  }
+
+  .payment-form-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.2em;
+  }
+
+  .payment-form-value {
+    border-bottom: 1px solid #000;
+    padding: 2px 0;
+    min-height: 15px;
+  }
+
+  /* Transaction History Print Styles */
+  .transaction-item {
+    border-bottom: 1px solid #ccc;
+    padding: 0.8em 0;
+    page-break-inside: avoid;
+  }
+
+  .transaction-date {
+    font-weight: bold;
+    margin-bottom: 0.2em;
+  }
+
+  .transaction-amount {
+    font-weight: bold;
+    text-align: right;
+  }
+
+  /* Analytics Print Styles */
+  .analytics-chart {
+    page-break-inside: avoid;
+    margin: 1em 0;
+  }
+
+  .analytics-summary {
+    border: 1px solid #000;
+    padding: 1em;
+    margin: 1em 0;
+  }
+
+  /* Utility Classes */
+  .print-screen-reader-only {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .print-link-text {
+    font-weight: bold;
+  }
+
+  .print-no-link {
+    text-decoration: none !important;
+  }
+
+  /* QR Codes and Barcodes */
+  .qr-code,
+  .barcode {
+    page-break-inside: avoid;
+    text-align: center;
+    margin: 1em 0;
+  }
+
+  /* Watermarks */
+  .print-watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 72pt;
+    color: #f0f0f0;
+    z-index: -1;
+    font-weight: bold;
+    pointer-events: none;
+  }
+
+  /* Print Margin Adjustments */
+  .print-narrow-margins {
+    margin: 0.5cm;
+  }
+
+  .print-wide-margins {
+    margin: 3cm;
+  }
+
+  /* Print Landscape */
+  @page landscape {
+    size: A4 landscape;
+  }
+
+  .print-landscape {
+    page: landscape;
+  }
+
+  /* Print Portrait */
+  @page portrait {
+    size: A4 portrait;
+  }
+
+  .print-portrait {
+    page: portrait;
+  }
+
+  /* Print Quality */
+  .print-high-quality {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure background colors print */
+  .print-bg-color {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Specific component overrides */
+  .calendar {
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+  }
+
+  .date-picker-input,
+  .date-range-picker-input {
+    border: 1px solid #000 !important;
+    background: white !important;
+  }
+
+  /* Loading states */
+  .skeleton,
+  .spinner,
+  .loading {
+    display: none !important;
+  }
+
+  /* Error states */
+  .error-message {
+    border: 1px solid #000 !important;
+    background: #fff3cd !important;
+    color: #856404 !important;
+    padding: 0.5em;
+  }
+
+  /* Success states */
+  .success-message {
+    border: 1px solid #000 !important;
+    background: #d4edda !important;
+    color: #155724 !important;
+    padding: 0.5em;
+  }
+}
+
+/* Print Preview Styles */
+@media screen {
+  .print-preview {
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin: 20px auto;
+    max-width: 210mm;
+    min-height: 297mm;
+    padding: 20px;
+  }
+
+  .print-preview-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .print-preview-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+    font-size: 12px;
+    color: #666;
+  }
+}
